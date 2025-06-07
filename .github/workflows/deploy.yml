@@ -31,9 +31,9 @@ jobs:
 
     - name: Test Docker container
       run: |
-        docker run -d -p 8000:8000 --name test-container fastapi-app:test
+        docker run -d -p 8080:8080 --name test-container fastapi-app:test
         sleep 10
-        curl -f http://localhost:8000/health || exit 1
+        curl -f http://localhost:8080/health || exit 1
         docker stop test-container
         docker rm test-container
 

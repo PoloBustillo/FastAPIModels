@@ -101,7 +101,7 @@ source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 
 # Ejecutar aplicación
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8080
 ```
 
 ### 2. Desarrollo con Docker
