@@ -1,14 +1,20 @@
 # main.py
-from fastapi import FastAPI, HTTPException
+from fastapi import File, UploadFile, FastAPI, HTTPException
+import shutil
+import os
 from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI(
     title="Mi API FastAPI",
     description="API de ejemplo con Docker y GitHub Actions",
     version="1.0.0"
 )
+2
 
 # Modelo de datos
 class Item(BaseModel):
@@ -31,6 +37,13 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "version": "1.0.0"}
+
+@app.post("/upload-image")
+async def upload_image(file: UploadFile = File(...)):
+    file_location = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_location, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return {"filename": file.filename, "message": "Image uploaded successfully"}
 
 @app.get("/items", response_model=List[Item])
 async def get_items():

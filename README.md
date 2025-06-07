@@ -247,3 +247,21 @@ docker-compose -f docker-compose.prod.yml up -d
 - Se hace backup automático de la versión anterior
 - Los logs están disponibles con `docker-compose logs`
 - La aplicación se reinicia automáticamente si falla
+
+## Upload Image Endpoint
+
+**POST** `/upload-image`
+
+Upload an image file.
+
+- **Request:**  
+  Content-Type: `multipart/form-data`  
+  Body:  
+  - `file`: The image file to upload.
+
+- **Response:**  
+  ```json
+  {
+    "filename": "your_image.jpg",
+    "message": "Image uploaded successfully"
+  }
