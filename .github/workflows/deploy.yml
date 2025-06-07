@@ -86,7 +86,7 @@ jobs:
           
           # Verificar que la aplicación esté funcionando
           sleep 15
-          curl -f http://localhost:8080/health || exit 1
+          curl -f http://localhost:8081/health || exit 1
           
           # Limpiar imágenes viejas
           docker image prune -f
