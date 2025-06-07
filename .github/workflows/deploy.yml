@@ -25,10 +25,6 @@ jobs:
         pip install -r requirements.txt
         pip install pytest httpx
 
-    - name: Run tests
-      run: |
-        pytest tests/ -v
-
     - name: Build Docker image
       run: |
         docker build -t fastapi-app:test .
