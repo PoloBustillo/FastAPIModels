@@ -61,7 +61,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         source: "fastapi-app.tar.gz,docker-compose.prod.yml,nginx.conf"
-        target: "/opt/fastapi-app/"
+        target: "./fastapi-app/"
 
     - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.0
@@ -70,7 +70,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         script: |
-          cd /opt/fastapi-app
+          cd ./fastapi-app
           
           # Cargar nueva imagen Docker
           docker load < fastapi-app.tar.gz
