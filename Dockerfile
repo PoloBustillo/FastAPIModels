@@ -11,8 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copiar requirements y instalar dependencias Python
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
+RUN pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
 # Copiar el código de la aplicación
 COPY . .
 
