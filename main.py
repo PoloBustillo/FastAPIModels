@@ -40,7 +40,7 @@ async def root():
 async def health_check():
     return {"status": "healthy", "version": "1.0.0"}
 
-@app.post("/upload-image")
+@app.post("/image-to-text")
 async def upload_image(file: UploadFile = File(...)):
     processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
     model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
