@@ -41,7 +41,14 @@ jobs:
         docker tag ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:latest
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:${{ github.sha }}
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:latest
-
+    - name: Copy docker-compose.prod.yml to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        source: ./docker-compose.prod.yml
+        target: ./fastapi-app
     - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.0
       with:
