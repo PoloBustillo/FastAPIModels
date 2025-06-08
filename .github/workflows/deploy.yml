@@ -1,4 +1,3 @@
-# .github/workflows/deploy.yml
 name: Deploy FastAPI to Server
 
 on:
@@ -8,59 +7,33 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest httpx
-
-    - name: Build Docker image
-      run: |
-        docker build -t fastapi-app:test .
-
-    - name: Test Docker container
-      run: |
-        docker run -d -p 8080:8080 --name test-container fastapi-app:test
-        sleep 10
-        curl -f http://localhost:8080/health || exit 1
-        docker stop test-container
-        docker rm test-container
-
   deploy:
-    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Build Docker image
-      run: |
-        docker build -t fastapi-app:${{ github.sha }} .
-        docker tag fastapi-app:${{ github.sha }} fastapi-app:latest
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Save Docker image
+    - name: Build and push Docker image
       run: |
-        docker save fastapi-app:latest | gzip > fastapi-app.tar.gz
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:${{ github.sha }} .
+        docker tag ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:${{ github.sha }}
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:latest
 
-    - name: Copy files to server
+    - name: Copy config files to server
       uses: appleboy/scp-action@v0.1.5
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
-        source: "fastapi-app.tar.gz,docker-compose.prod.yml,nginx.conf"
+        source: "docker-compose.prod.yml,nginx.conf"
         target: "./fastapi-app/"
 
     - name: Deploy to server
@@ -71,27 +44,10 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         script: |
           cd ./fastapi-app
-          
-          # Cargar nueva imagen Docker
-          docker load < fastapi-app.tar.gz
-          
-          # Hacer backup de la versión actual
-          docker tag fastapi-app:latest fastapi-app:backup || true
-          
-          # Detener contenedores existentes
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:latest
           docker-compose -f docker-compose.prod.yml down || true
-          
-          # Iniciar nuevos contenedores
           docker-compose -f docker-compose.prod.yml up -d
-          
-          # Verificar que la aplicación esté funcionando
           sleep 15
           curl -f http://localhost:8081/health || exit 1
-          
-          # Limpiar imágenes viejas
           docker image prune -f
-          
-          # Eliminar archivo temporal
-          rm fastapi-app.tar.gz
-          
           echo "Deployment completed successfully!"
