@@ -5,6 +5,8 @@ import os
 from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
+from transformers import BlipProcessor, BlipForConditionalGeneration
+from PIL import Image
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -40,10 +42,21 @@ async def health_check():
 
 @app.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
-    file_location = os.path.join(UPLOAD_DIR, file.filename)
-    with open(file_location, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    return {"filename": file.filename, "message": "Image uploaded successfully"}
+    processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+
+    img = Image.open(file.file).convert("RGB")
+    inputs = processor(img, return_tensors="pt")
+    out = model.generate(**inputs)
+    caption = processor.decode(out[0], skip_special_tokens=True)
+    # file_location = os.path.join(UPLOAD_DIR, file.filename)
+    # with open(file_location, "wb") as buffer:
+    #     shutil.copyfileobj(file.file, buffer)
+    return {
+        "filename": file.filename,
+        "caption": caption,
+        "message": "Image uploaded and caption generated successfully"
+    }
 
 @app.get("/items", response_model=List[Item])
 async def get_items():
