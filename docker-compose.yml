@@ -2,16 +2,8 @@ version: '3.8'
 
 services:
   api:
-    image: fastapi-app:latest
+    build: .
     container_name: fastapi-api
-    environment:
-      - ENVIRONMENT=production
-    expose:
-      - "8081"
+    ports:
+      - "8000:8000"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s

@@ -1,5 +1,26 @@
-.venv
-venv
-.idea
-*.iml
-__pycache__
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+.venv/
+venv/
+ENV/
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# PyCharm
+.idea/
+
+# Docker
+*.log
+debug.log
+
+# Others
+uploads/
+
